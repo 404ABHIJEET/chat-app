@@ -14,7 +14,7 @@ const Page = () => {
     const [username, setUsername] = useState<string>('')
     const [usernameMessage, setUsernameMessage] = useState<string>('')
     const [isCheckingUsername, setIsCheckingUsername] = useState<boolean>(false)
-    const debounced = useDebounceCallback(setUsername, 300)
+    const debounced = useDebounceCallback(setUsername, 500)
 
     const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof userSignUpSchema>>({
         resolver: zodResolver(userSignUpSchema),
@@ -29,6 +29,10 @@ const Page = () => {
 
     useEffect(() => {
         const checkUsernameUnique = async () => {
+            if(!username) {
+                setUsernameMessage('')
+                return
+            }
             if (username) {
                 setIsCheckingUsername(true);
                 setUsernameMessage('');
@@ -77,9 +81,6 @@ const Page = () => {
                             {...register('email')}
                             className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter your name"
-                            onChange={(e) => {
-                                debounced(e.target.value)
-                            }}
                         />
                         {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
                     </div>
@@ -90,6 +91,9 @@ const Page = () => {
                             {...register('username')}
                             className="w-full p-2 border border-gray-300 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter your username"
+                            onChange={(e: any) => {
+                                debounced(e.target.value)
+                            }}
                         />
                         {isCheckingUsername && <Loader2 className="animate-spin" />}
                         {!isCheckingUsername && (
