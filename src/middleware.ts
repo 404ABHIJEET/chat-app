@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import UserModel from "@/models/userModel";
-import dbConnect from "@/lib/dbConnect";
+import axios from "axios";
+import { ApiResponse } from "./types/apiResponse";
 
 export async function middleware(req: NextRequest) {
-    
-    await dbConnect(); 
 
     const token = req.cookies.get("token_chat_app")?.value; 
     if (!token) {
@@ -21,8 +19,12 @@ export async function middleware(req: NextRequest) {
             return NextResponse.redirect(new URL("/login", req.url));
         }
 
-        const user = await UserModel.findById(decoded.id);
-        if (!user || user.token !== token) {
+        const result = await axios.post<ApiResponse>("/api/auth", {
+            id: decoded.id,
+            token: token
+        })
+
+        if (!result || !result.data.success) {
             return NextResponse.redirect(new URL("/login", req.url));
         }
 
