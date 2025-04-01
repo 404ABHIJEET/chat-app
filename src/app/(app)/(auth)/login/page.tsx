@@ -1,9 +1,8 @@
 'use client'
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import axios from "axios";
-import { ApiResponse } from "@/types/apiResponse";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 const Page = () => {
 
@@ -14,10 +13,16 @@ const Page = () => {
 
     const handleLogin = async (e: any) => {
         e.preventDefault()
-        const resposne = await axios.post<ApiResponse>('/api/login', {identifier, password})
-        localStorage.setItem('token', resposne.data.data.token)
-        if(resposne.data.success) {
-            router.replace("/chat")
+        const result = await signIn('credentials', {
+            redirect: false,
+            identifier: identifier,
+            password: password
+        })
+        if (result?.error) {
+           
+        }
+        else if (result?.url) {
+            router.replace(`/chat`);
         }
     };
 
